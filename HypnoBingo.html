@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hypnosis Bingo Generator</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+    }
+
+    .background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4) url("spiral.gif") center center no-repeat;
+      background-size: cover;
+      background-blend-mode: darken;
+      filter: blur(5px) brightness(0.75);
+      z-index: -1;
+      transition: opacity 2s ease;
+    }
+
+    .overlay {
+      position: relative;
+      z-index: 1;
+      color: #e0e0e0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      height: 100vh;
+overflow: hidden;
+    }
+
+    .glass {
+      background: rgba(26, 26, 26, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: none;
+      max-width: 600px;
+      width: 90%;
+    }
+
+    h1 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 2em;
+      text-shadow: none;
+    }
+
+    select, button {
+  margin: 10px;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  color: #ffffff;
+  border: 1px solid #a020f0;
+  border-radius: 8px;
+  font-size: 2em;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  text-shadow: 0 0 10px #a020f0;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+select:hover, button:hover {
+  background-color: #2a2a2a;
+  box-shadow: none;
+  transform: scale(1.03);
+  cursor: pointer;
+}
+
+select:active, button:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 200px;
+      height: 8px;
+      border-radius: 5px;
+      background: #3b0066;
+      outline: none;
+      margin: 10px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #a020f0;
+      cursor: pointer;
+      border: 2px solid #e0e0e0;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #a020f0;
+      cursor: pointer;
+      border: 2px solid #e0e0e0;
+    }
+
+    #bingoBoard {
+      display: grid;
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .bingo-cell {
+      background-color: rgba(26, 26, 26, 0.7);
+      border: 1px solid #a020f0;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 8px;
+      user-select: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 80px;
+      min-width: 80px;
+      word-wrap: break-word;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .bingo-cell.marked {
+      background-color: #a020f0;
+      color: black;
+      text-decoration: line-through;
+    }
+
+    .bingo-cell.free {
+      background-color: #a020f0;
+      color: black;
+      font-style: italic;
+    }
+
+    .fade-out {
+      animation: fadeOut 2s forwards;
+    }
+
+    @keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes pulseGlow {
+  0% { filter: blur(0px) brightness(1); }
+  100% { filter: blur(5px) brightness(1.1); }
+}
+
+@keyframes spinBackground {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+    }
+
+    .restore-button {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  padding: 10px 14px;
+  background-color: rgba(26, 26, 26, 0.8);
+  color: white;
+  border: 1px solid #a020f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  text-shadow: 0 0 10px #a020f0;
+  font-weight: bold;
+  font-size: 2em;
+  text-align: center;
+}
+  </style>
+</head>
+<body>
+  <div class="background" id="background"></div>
+
+  <audio id="bgMusic" autoplay loop>
+    <source src="background.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="overlay" id="interface">
+    <div class="glass" style="max-height: 95vh; overflow: hidden; max-width: 750px; width: 95%; transition: all 1s ease;">
+      <h1>Hypnosis Bingo</h1>
+
+      <label for="listSelect">Select term list:</label>
+      <select id="listSelect"></select>
+
+      <label for="size">Select grid size:</label>
+      <select id="size">
+        <option value="3">3x3</option>
+        <option value="4">4x4</option>
+        <option value="5" selected>5x5</option>
+        <option value="6">6x6</option>
+      </select>
+
+      <div>
+        <label for="volume">Music volume:</label>
+        <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+        <div>
+          <button style="font-size: 1em; padding: 6px 10px;" onclick="bgMusic.play()">Play</button>
+          <button style="font-size: 1em; padding: 6px 10px;" onclick="bgMusic.pause()">Stop</button>
+        </div>
+      </div>
+
+      <button style="font-size: 1.2em; padding: 8px 12px;" onclick="generateBingo()">Generate Bingo</button>
+      <button style="font-size: 1.2em; padding: 8px 12px;" onclick="hypnotizeMe()">Hypnotize Me</button>
+
+      <div id="bingoBoard"></div>
+    </div>
+</div>
+<button class="restore-button" id="restoreButton" onclick="restoreUI()" style="display: none;">Wake Up</button>
+<script>
+    let terms = [];
+    let size = 5;
+
+    document.getElementById('size').addEventListener('change', e => size = parseInt(e.target.value));
+
+    document.getElementById('listSelect').addEventListener('change', e => {
+      const filename = e.target.value;
+      fetch(`lists/${filename}`)
+        .then(res => res.text())
+        .then(text => {
+          terms = text.split('\n').filter(line => line.trim().length > 0);
+          generateBingo();
+        });
+    });
+
+    function loadAvailableLists() {
+      fetch('lists/listing.json')
+        .then(res => res.json())
+        .then(files => {
+          const select = document.getElementById('listSelect');
+          select.innerHTML = '';
+          files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            select.appendChild(option);
+          });
+          select.dispatchEvent(new Event('change'));
+        });
+    }
+
+    function generateBingo() {
+      if (terms.length === 0) {
+        alert("Please select a term list first.");
+        return;
+      }
+
+      const board = document.getElementById('bingoBoard');
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+
+      let shuffled = terms.slice().sort(() => 0.5 - Math.random());
+      let selected = shuffled.slice(0, size * size);
+      let cells = [];
+
+      for (let i = 0; i < size * size; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bingo-cell';
+
+        if (size % 2 === 1 && i === Math.floor(size * size / 2)) {
+          cell.textContent = 'FREE';
+          cell.classList.add('marked', 'free');
+        } else {
+          cell.textContent = selected[i] || '';
+        }
+
+        cell.addEventListener('click', () => {
+          if (!cell.classList.contains('free')) {
+            cell.classList.toggle('marked');
+            checkBingo(cells);
+          }
+        });
+
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
+
+    function checkBingo(cells) {
+      let matrix = [];
+      for (let i = 0; i < size; i++) {
+        matrix.push(cells.slice(i * size, (i + 1) * size));
+      }
+
+      const allMarked = line => line.every(cell => cell.classList.contains('marked'));
+
+      for (let i = 0; i < size; i++) {
+        if (allMarked(matrix[i]) || allMarked(matrix.map(row => row[i]))) {
+          alert("BINGO!");
+          return;
+        }
+      }
+
+      if (allMarked(matrix.map((row, i) => row[i])) || allMarked(matrix.map((row, i) => row[size - 1 - i]))) {
+        alert("BINGO!");
+      }
+    }
+
+    const volumeSlider = document.getElementById('volume');
+    const bgMusic = document.getElementById('bgMusic');
+    volumeSlider.addEventListener('input', () => {
+      bgMusic.volume = volumeSlider.value;
+    });
+
+    function hypnotizeMe(mode = 'pulse') {
+  const glass = document.querySelector('.glass');
+  glass.style.transition = 'all 1s ease';
+glass.style.background = 'rgba(26, 26, 26, 0)';
+glass.style.backdropFilter = 'blur(0px)';
+glass.style.webkitBackdropFilter = 'blur(0px)';
+  const interface = document.getElementById('interface');
+  const background = document.getElementById('background');
+  const button = document.querySelector('button[onclick="hypnotizeMe()"]');
+
+  interface.classList.add('fade-out');
+  background.style.transition = 'filter 3s ease';
+  document.getElementById('restoreButton').style.display = 'block';
+
+  switch (mode) {
+    case 'pulse':
+      background.style.animation = 'none';
+      background.style.filter = 'blur(1px) brightness(1.1)';
+      break;
+    case 'spin':
+      background.style.animation = 'spinBackground 20s linear infinite';
+      background.style.filter = 'blur(5px) brightness(1)';
+      break;
+    case 'focus':
+      background.style.filter = 'blur(0px) brightness(1.2)';
+      break;
+    default:
+      background.style.filter = 'blur(0px) brightness(1)';
+  }
+
+  button.style.boxShadow = 'none';
+  button.style.textShadow = 'none';
+
+  const audio = new Audio('hypnotic_chime.mp3');
+  audio.volume = 0.5;
+  audio.play();
+}
+
+// Add keyframes for pulse effect
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes pulseGlow {
+  0% { filter: blur(0px) brightness(1); }
+  100% { filter: blur(4px) brightness(1.1); }
+}`;
+document.head.appendChild(style);
+
+    function restoreUI() {
+  const interface = document.getElementById('interface');
+  const background = document.getElementById('background');
+  const glass = document.querySelector('.glass');
+  interface.style.opacity = '1';
+  interface.style.visibility = 'visible';
+  interface.classList.remove('fade-out');
+  background.style.filter = 'blur(5px) brightness(0.75)';
+  document.getElementById('restoreButton').style.display = 'none';
+
+  // restore glass effect
+  glass.style.transition = 'all 1s ease';
+  glass.style.background = 'rgba(26, 26, 26, 0.6)';
+  glass.style.backdropFilter = 'blur(10px)';
+  glass.style.webkitBackdropFilter = 'blur(10px)';
+}
+
+    loadAvailableLists();
+  </script>
+
+
+</body>
+</html>
