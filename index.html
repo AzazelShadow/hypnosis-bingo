@@ -5,16 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hypnosis Bingo Generator</title>
   <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-    }
+    body, html { margin: 0; padding: 0; }
     .background {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       background: rgba(0, 0, 0, 0.4) url("spiral.gif") center center no-repeat;
       background-size: cover;
       background-blend-mode: darken;
@@ -41,7 +36,6 @@
       -webkit-backdrop-filter: blur(10px);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: none;
       max-width: 900px;
       width: 98%;
       transition: all 1s ease;
@@ -51,9 +45,12 @@
       margin-bottom: 20px;
       text-align: center;
       font-size: 2em;
-      text-shadow: none;
     }
     select, button {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 0 0 6px #a020f0;
       margin: 10px;
       padding: 6px 10px;
       background: #1a1a1a;
@@ -61,14 +58,18 @@
       border: 1px solid #a020f0;
       border-radius: 8px;
       font-size: 1em;
-      font-family: "Segoe UI", Roboto, sans-serif;
-      text-shadow: none;
       font-weight: bold;
       text-align: center;
       transition: all 0.3s ease;
-      box-shadow: none;
+    }
+    select:hover, button:hover {
+      transform: scale(1.05);
+      background-color: #2a003f;
+      box-shadow: 0 0 10px #a020f0;
     }
     input[type="range"] {
+      box-shadow: 0 0 6px #a020f0;
+      border: 1px solid #a020f0;
       -webkit-appearance: none;
       width: 200px;
       height: 8px;
@@ -80,14 +81,6 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #a020f0;
-      cursor: pointer;
-      border: 2px solid #e0e0e0;
-    }
-    input[type="range"]::-moz-range-thumb {
       width: 20px;
       height: 20px;
       border-radius: 50%;
@@ -127,24 +120,9 @@
       color: black;
       font-style: italic;
     }
-    .fade-out {
-      animation: fadeOut 2s forwards;
-    }
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-    @keyframes pulseGlow {
-      0% { filter: blur(0px) brightness(1); }
-      100% { filter: blur(5px) brightness(1.1); }
-    }
-    @keyframes spinBackground {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 100% 100%; }
-    }
     .restore-button {
+      opacity: 0;
+      transition: opacity 1s ease;
       display: none;
       position: fixed;
       bottom: 20px;
@@ -159,29 +137,62 @@
       font-size: 2em;
       font-family: "Segoe UI", Roboto, sans-serif;
       font-weight: bold;
+    }
+      .fade-out {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    .fade-in {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+  .title-glow {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 2px;
+      font-size: 3.5em;
+      text-transform: uppercase;
       text-align: center;
+      text-shadow: 0 0 10px #a020f0, 0 0 20px #a020f0, 0 0 30px #a020f0;
+      animation: titleGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { text-shadow: 0 0 10px #a020f0, 0 0 20px #a020f0, 0 0 30px #a020f0; }
+      to { text-shadow: 0 0 20px #a020f0, 0 0 30px #a020f0, 0 0 40px #a020f0; }
+    }
+
+      select option {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: bold;
+      background-color: #1a1a1a;
+      color: #ffffff;
+      text-shadow: 0 0 6px #a020f0;
     }
   </style>
 </head>
 <body>
   <div class="background" id="background"></div>
   <audio id="bgMusic" autoplay loop>
-    <source src="background.mp3" type="audio/mpeg">
+    <source id="musicSource" src="music/background.mp3" type="audio/mpeg">
   </audio>
   <div class="overlay" id="interface">
-    <div class="glass">
-      <h1>Hypnosis Bingo</h1>
-      <label for="listSelect">Select term list:</label>
+    <div class="glass" style="font-family: 'Orbitron', sans-serif; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #a020f0;">
+      <h1 class="title-glow">Hypnosis Bingo</h1>
+      <label for="listSelect" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #a020f0;">Select term list:</label>
       <select id="listSelect"></select>
-      <label for="size">Select grid size:</label>
+      <label for="size" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #a020f0;">Select grid size:</label>
       <select id="size">
         <option value="3">3x3</option>
         <option value="4">4x4</option>
         <option value="5" selected>5x5</option>
         <option value="6">6x6</option>
       </select>
+      <label for="musicSelect" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #a020f0;">Select music track:</label>
+      <select id="musicSelect"></select>
       <div>
-        <label for="volume">Music volume:</label>
+        <label for="volume" style="font-family: 'Orbitron', sans-serif; letter-spacing: 1px; color: #ffffff; font-weight: bold; text-shadow: 0 0 8px #a020f0;">Music volume:</label>
         <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
         <div>
           <button onclick="bgMusic.play()">Play</button>
@@ -209,6 +220,15 @@
         });
     });
 
+    document.getElementById('musicSelect').addEventListener('change', e => {
+      const file = e.target.value;
+      const source = document.getElementById('musicSource');
+      source.src = `music/${file}`;
+      const audio = document.getElementById('bgMusic');
+      audio.load();
+      audio.play();
+    });
+
     function loadAvailableLists() {
       fetch('lists/listing.json')
         .then(res => res.json())
@@ -225,20 +245,34 @@
         });
     }
 
+    function loadAvailableMusic() {
+      fetch('music/listing.json')
+        .then(res => res.json())
+        .then(files => {
+          const select = document.getElementById('musicSelect');
+          select.innerHTML = '';
+          files.forEach(file => {
+            const option = document.createElement('option');
+            option.value = file;
+            option.textContent = file;
+            select.appendChild(option);
+          });
+          select.value = 'background.mp3';
+          select.dispatchEvent(new Event('change'));
+        });
+    }
+
     function generateBingo() {
       if (terms.length === 0) {
         alert("Please select a term list first.");
         return;
       }
-
       const board = document.getElementById('bingoBoard');
       board.innerHTML = '';
       board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-
       let shuffled = terms.slice().sort(() => 0.5 - Math.random());
       let selected = shuffled.slice(0, size * size);
       let cells = [];
-
       for (let i = 0; i < size * size; i++) {
         const cell = document.createElement('div');
         cell.className = 'bingo-cell';
@@ -279,18 +313,23 @@
 
     function hypnotizeMe() {
       const glass = document.querySelector('.glass');
+      const interface = document.getElementById('interface');
+      const background = document.getElementById('background');
+
       glass.style.transition = 'all 1s ease';
       glass.style.background = 'rgba(26, 26, 26, 0)';
       glass.style.backdropFilter = 'blur(0px)';
       glass.style.webkitBackdropFilter = 'blur(0px)';
 
-      const interface = document.getElementById('interface');
-      const background = document.getElementById('background');
+      interface.classList.remove('fade-in');
       interface.classList.add('fade-out');
       background.style.transition = 'filter 3s ease';
       background.style.filter = 'blur(1px) brightness(1.1)';
-      document.getElementById('restoreButton').style.display = 'block';
-
+      const restoreButton = document.getElementById('restoreButton');
+      restoreButton.style.display = 'block';
+      requestAnimationFrame(() => {
+        restoreButton.style.opacity = '1';
+      });
       const audio = new Audio('hypnotic_chime.mp3');
       audio.volume = 0.5;
       audio.play();
@@ -300,11 +339,13 @@
       const interface = document.getElementById('interface');
       const background = document.getElementById('background');
       const glass = document.querySelector('.glass');
-      interface.style.opacity = '1';
-      interface.style.visibility = 'visible';
+
       interface.classList.remove('fade-out');
+      interface.classList.add('fade-in');
       background.style.filter = 'blur(5px) brightness(0.75)';
-      document.getElementById('restoreButton').style.display = 'none';
+      const restoreButton = document.getElementById('restoreButton');
+      restoreButton.style.opacity = '0';
+      setTimeout(() => restoreButton.style.display = 'none', 1000);
       glass.style.transition = 'all 1s ease';
       glass.style.background = 'rgba(26, 26, 26, 0.6)';
       glass.style.backdropFilter = 'blur(10px)';
@@ -312,6 +353,8 @@
     }
 
     loadAvailableLists();
+    loadAvailableMusic();
   </script>
 </body>
 </html>
+
